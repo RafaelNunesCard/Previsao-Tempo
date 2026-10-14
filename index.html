@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Áureo — Clima</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <i class="ri-sun-cloudy-line"></i>
+      <span>Áureo</span>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-item active" data-tab="map">
+        <i class="ri-map-pin-2-line"></i>
+        <span>Mapa</span>
+      </button>
+      <button class="nav-item" data-tab="chart">
+        <i class="ri-line-chart-line"></i>
+        <span>Gráfico</span>
+      </button>
+      <button class="nav-item" data-tab="json">
+        <i class="ri-code-line"></i>
+        <span>JSON</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <i class="ri-cloud-line"></i>
+      <span>Open-Meteo API</span>
+    </div>
+  </aside>
+
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <div class="main">
+    <header class="header">
+      <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menu">
+        <i class="ri-menu-3-line"></i>
+      </button>
+
+      <div class="header-content">
+        <h1>Previsão do tempo</h1>
+        <p class="subtitle">Dados da API Open-Meteo</p>
+
+        <div class="search-box">
+          <i class="ri-search-line search-icon"></i>
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Buscar cidade... (ex: Lisboa, São Paulo)"
+            autocomplete="off"
+          >
+          <ul id="suggestions" class="suggestions hidden"></ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="current-card" class="card current-card hidden">
+        <div class="current-main">
+          <div id="weather-icon" class="weather-icon"><i class="ri-sun-cloudy-line"></i></div>
+          <div>
+            <div id="current-temp" class="current-temp">—</div>
+            <div id="current-place" class="current-place"></div>
+          </div>
+        </div>
+        <div class="current-details">
+          <div class="detail">
+            <span class="detail-label"><i class="ri-sun-cloudy-line"></i> Condição</span>
+            <span id="current-condition" class="detail-value">—</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label"><i class="ri-drop-line"></i> Umidade</span>
+            <span id="current-humidity" class="detail-value">—</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label"><i class="ri-windy-line"></i> Vento</span>
+            <span id="current-wind" class="detail-value">—</span>
+          </div>
+          <div class="detail">
+            <span class="detail-label"><i class="ri-time-line"></i> Hora local</span>
+            <span id="current-time" class="detail-value">—</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel">
+        <div id="map" class="tab-content active">
+          <div id="map-canvas"></div>
+          <button id="snow-btn" class="map-btn">
+            <i class="ri-snowflake-line"></i>
+            <span>Onde está nevando?</span>
+          </button>
+        </div>
+
+        <div id="chart" class="tab-content">
+          <p id="chart-hint" class="hint">
+            <i class="ri-line-chart-line"></i>
+            Selecione um local na busca ou clique no mapa.
+          </p>
+          <div class="chart-wrap">
+            <canvas id="temp-chart"></canvas>
+          </div>
+          <div class="legend-custom">
+            <span><i class="dot dot-past"></i> Histórico (2 dias)</span>
+            <span><i class="dot dot-now"></i> Agora</span>
+            <span><i class="dot dot-future"></i> Previsão (4 dias)</span>
+          </div>
+        </div>
+
+        <div id="json" class="tab-content">
+          <p id="json-hint" class="hint">
+            <i class="ri-braces-line"></i>
+            Selecione um local para ver o JSON retornado pela API.
+          </p>
+          <pre id="json-output" class="json-output hidden"></pre>
+        </div>
+      </section>
+
+      <p id="status" class="status hidden"></p>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
