@@ -48,7 +48,7 @@
         <h1>Previsão do tempo</h1>
         <p class="subtitle">Dados da API Open-Meteo</p>
 
-        <div class="search-box">
+        <form id="search-form" class="search-box" autocomplete="off">
           <i class="ri-search-line search-icon"></i>
           <input
             type="text"
@@ -56,8 +56,12 @@
             placeholder="Buscar cidade... (ex: Lisboa, São Paulo)"
             autocomplete="off"
           >
+          <button type="submit" class="search-btn">
+            <i class="ri-search-line"></i>
+            <span>Consultar</span>
+          </button>
           <ul id="suggestions" class="suggestions hidden"></ul>
-        </div>
+        </form>
       </div>
     </header>
 

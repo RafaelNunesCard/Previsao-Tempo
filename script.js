@@ -1,6 +1,11 @@
-const GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
-const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
-const NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
+// Toda requisição às APIs públicas passa pelo backend PHP (api.php),
+// que faz a chamada HTTP no servidor e devolve o JSON processado.
+const API_URL = "api.php";
+
+function apiUrl(action, params = {}) {
+  const query = new URLSearchParams({ action, ...params });
+  return `${API_URL}?${query}`;
+}
 
 const $ = (id) => document.getElementById(id);
 
@@ -121,11 +126,6 @@ els.search.addEventListener("input", () => {
 });
 
 els.search.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    clearTimeout(debounceTimer);
-    const first = els.suggestions.querySelector("li");
-    if (first) first.click();
-  }
   if (e.key === "Escape") hideSuggestions();
 });
 
@@ -137,22 +137,63 @@ function hideSuggestions() {
   els.suggestions.classList.add("hidden");
 }
 
+async function fetchLocations(query, signal) {
+  const url = apiUrl("geocode", { q: query });
+  const res = await fetch(url, { signal });
+  if (!res.ok) throw new Error(`Erro ${res.status} na API de geocoding`);
+  const data = await res.json();
+  return data.results || [];
+}
+
 async function searchLocations(query) {
   if (state.searchAbort) state.searchAbort.abort();
   state.searchAbort = new AbortController();
 
   try {
-    const url = `${GEO_URL}?name=${encodeURIComponent(query)}&count=8&language=pt&format=json`;
-    const res = await fetch(url, { signal: state.searchAbort.signal });
-    if (!res.ok) throw new Error(`Erro ${res.status} na API de geocoding`);
-    const data = await res.json();
-    renderSuggestions(data.results || []);
+    const results = await fetchLocations(query, state.searchAbort.signal);
+    renderSuggestions(results);
   } catch (err) {
     if (err.name !== "AbortError") {
       console.error(err);
       setStatus("Não foi possível buscar locais. Verifique sua conexão.", true);
     }
   }
+}
+
+// Botão "Consultar": pega o texto do campo, consulta o PHP e carrega o 1º resultado.
+async function consultar() {
+  clearTimeout(debounceTimer);
+  const query = els.search.value.trim();
+  if (!query) {
+    setStatus("Digite o nome de uma cidade para consultar.", true);
+    return;
+  }
+
+  hideSuggestions();
+  setStatus("Consultando...");
+
+  try {
+    const results = await fetchLocations(query);
+    if (!results.length) {
+      setStatus(`Nenhum local encontrado para "${query}".`, true);
+      return;
+    }
+    const r = results[0];
+    els.search.value = r.name;
+    const label = [r.name, r.country].filter(Boolean).join(", ");
+    loadWeather(r.latitude, r.longitude, label, { pan: true, placeOnMap: true });
+  } catch (err) {
+    console.error(err);
+    setStatus("Não foi possível buscar locais. Verifique sua conexão.", true);
+  }
+}
+
+const searchForm = $("search-form");
+if (searchForm) {
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    consultar();
+  });
 }
 
 function renderSuggestions(results) {
@@ -202,17 +243,12 @@ async function loadWeather(lat, lon, label, opts = {}) {
   els.currentCard.classList.add("hidden");
 
   try {
-    const params = new URLSearchParams({
+    const url = apiUrl("weather", {
       latitude: lat.toFixed(4),
       longitude: lon.toFixed(4),
-      current: "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m",
-      hourly: "temperature_2m",
-      past_days: "2",
-      forecast_days: "5",
-      timezone: "auto",
     });
 
-    const res = await fetch(`${FORECAST_URL}?${params}`, {
+    const res = await fetch(url, {
       signal: state.weatherAbort.signal,
     });
     if (!res.ok) throw new Error(`Erro ${res.status} na API de clima`);
@@ -495,13 +531,11 @@ const CITIES = [
 ];
 
 async function fetchChunkSnow(chunk) {
-  const params = new URLSearchParams({
+  const url = apiUrl("snow", {
     latitude: chunk.map((c) => c.lat).join(","),
     longitude: chunk.map((c) => c.lon).join(","),
-    current: "temperature_2m,weather_code,snowfall",
-    timezone: "auto",
   });
-  const res = await fetch(`${FORECAST_URL}?${params}`);
+  const res = await fetch(url);
   if (!res.ok) throw new Error(`Erro ${res.status} ao consultar neve`);
   const data = await res.json();
   const arr = Array.isArray(data) ? data : [data];
@@ -581,7 +615,7 @@ async function showSnowing() {
 
 async function reverseGeocode(lat, lon) {
   try {
-    const url = `${NOMINATIM_URL}?format=jsonv2&zoom=10&lat=${lat}&lon=${lon}`;
+    const url = apiUrl("reverse", { latitude: lat, longitude: lon });
     const res = await fetch(url);
     if (!res.ok) throw new Error(`Erro ${res.status}`);
     const data = await res.json();

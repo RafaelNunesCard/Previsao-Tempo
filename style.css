@@ -161,8 +161,11 @@ body {
 
 .search-box {
   position: relative;
-  max-width: 480px;
+  max-width: 560px;
   margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .search-icon {
@@ -176,6 +179,8 @@ body {
 }
 
 #search-input {
+  flex: 1;
+  min-width: 0;
   width: 100%;
   padding: 13px 16px 13px 42px;
   font-size: 1rem;
@@ -190,6 +195,31 @@ body {
 
 #search-input:focus {
   border-color: var(--accent);
+}
+
+.search-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 18px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.2s, transform 0.05s;
+}
+
+.search-btn:hover {
+  filter: brightness(1.08);
+}
+
+.search-btn:active {
+  transform: translateY(1px);
 }
 
 .suggestions {
