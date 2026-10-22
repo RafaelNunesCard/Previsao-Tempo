@@ -121,7 +121,7 @@ O `serve.bat` já habilita essas extensões automaticamente a partir da pasta
 - [x] **Página inicial** com: título do sistema, formulário, campo de pesquisa,
       botão de consulta e área para apresentação dos resultados
 - [x] Código publicado no GitHub com este **README**
-- [ ] Vídeo no YouTube demonstrando o site funcionando *(entrega individual)*
+- [x] Vídeo no YouTube demonstrando o site funcionando *(entrega individual)*
 
 ---
 
